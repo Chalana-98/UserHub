@@ -4,14 +4,10 @@ export interface User {
     lastName: string;
     email: string;
     age: number;
-    image?: string;
     phone?: string;
     address?: {
       address: string;
       city: string;
-    };
-    company?: {
-      name: string;
     };
   }
   
