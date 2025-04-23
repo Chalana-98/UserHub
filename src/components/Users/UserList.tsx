@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import SearchBar from './SearchBar';
-import { Plus, Loader } from 'lucide-react';
-import { deleteUser, fetchUsers } from '../../services/UserService';
+import React, { useState, useEffect } from 'react';
 import { User } from '../../types';
 import UserCard from './UserCard';
 import UserForm from './UserForm';
+import SearchBar from './SearchBar';
+import { Plus, Loader } from 'lucide-react';
+import Toast from '../UI/Toast';
+import { deleteUser, fetchUsers } from '../../services/UserService';
 
 const UserList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -14,7 +15,7 @@ const UserList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
- 
+  const [notification, setNotification] = useState<{message: string; type: 'success' | 'error'} | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -45,6 +46,7 @@ const UserList: React.FC = () => {
       setFilteredUsers(data);
     } catch (err) {
       setError('Failed to load users. Please try again later.');
+      showNotification('Failed to load users', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +72,9 @@ const UserList: React.FC = () => {
         await deleteUser(id);
         setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
         setFilteredUsers(prevUsers => prevUsers.filter(user => user.id !== id));
+        showNotification('User deleted successfully', 'success');
       } catch (err) {
+        showNotification('Failed to delete user. Please try again.', 'error');
       }
     }
   };
@@ -89,16 +93,22 @@ const UserList: React.FC = () => {
       setFilteredUsers(prevUsers => 
         prevUsers.map(u => u.id === savedUser.id ? savedUser : u)
       );
+      showNotification('User updated successfully', 'success');
     } else {
       // Add new user
       setUsers(prevUsers => [savedUser, ...prevUsers]);
       setFilteredUsers(prevUsers => [savedUser, ...prevUsers]);
+      showNotification('User added successfully', 'success');
     }
     
     setIsFormOpen(false);
     setCurrentUser(null);
   };
 
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   if (isLoading) {
     return (
@@ -163,6 +173,13 @@ const UserList: React.FC = () => {
         />
       )}
       
+      {notification && (
+        <Toast 
+          message={notification.message} 
+          type={notification.type} 
+          onClose={() => setNotification(null)} 
+        />
+      )}
     </div>
   );
 };
