@@ -1,21 +1,21 @@
+import React from 'react';
 
+import LoginPage from './pages/LoginPage';
+import Dashboard from './pages/Dashboard';
+import { AuthProvider, useAuth } from './Context/AuthContext';
 
-import './App.css'
-
-function App() {
-
-  return (
-    <>
-     <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Welcome to UserHub
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Sign in to manage your users
-        </p>
-      </div>
-    </>
-  )
+function AppContent() {
+  const { isAuthenticated } = useAuth();
+  
+  return isAuthenticated ? <Dashboard /> : <LoginPage />;
 }
 
-export default App
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
+export default App;
